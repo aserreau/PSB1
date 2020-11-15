@@ -1,0 +1,123 @@
+---
+title: "Référence Github/Travaux/Packages Promo MSc Data Management"
+author: "Soukaina EL GHALDY & Antoine SERREAU"
+output: pdf_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, eval = TRUE, warning=FALSE, message = FALSE)
+```
+---
+
+## 1. Avant propos :
+
+Afin  d’accompagner l’ensemble de la promotion du MSc Data Management à Paris School of Business dans le suivi du cours du Professeur intervenant __M. Henri LAUDE__ dans les deux matières  __“Mathématiques pour le Big Data”__ et __“Programmation en R”__. Les délégués du MSc Data management ont créé ce fichier afin de vous aider à vous repairer par rapport aux attentes du cours.
+
+*_Avant de commencer, n’oubliez pas de parcourir attentivement toutes les ressources et visualiser la vidéo de 20 minutes sur le Fact-checking qui sont sur le GitHub du Professeur LAUDE._*
+
+__Vous trouverez dans ce document plusieurs tableaux qui vous guideront et vous aiderons à réaliser vos recherches dans cette « base de connaissances », notamment lors des évaluations.__
+
+## 2. Les consignes à suivre :
+
+Dans un premier temps, vous allez devoir créer obligatoirement un compte GitHub. Vous communiquerez ensuite votre identifiant Github aux délégués. Ensuite, sur votre compte GitHub, vous allez __« Fork-er »__ à partir du GitHub du professeur le dépôt __« PSB1 »__. 
+
+*Bravo ! Vous venez d’effectuer votre première manipulation GitHub.*
+
+Dans un deuxième temps, vous créerez un dépôt (ou __« repository »__ en anglais) que vous appellerez  __« PSB-X »__. Ce dépôt sera l’environnement où vous rendrez par la suite l’ensemble de vos travaux.
+
+Ci-dessous, la liste des étudiants avec leurs adressses mails et le nom du Github associé.
+
+```{r}
+library(readxl)
+library(dplyr)
+library(knitr)
+library(kableExtra)
+library(modelsummary)
+
+TableauDonnees <- read_excel("C:/Users/antse/Documents/MSc_PSB/Cours/Programmation R et Maths BigDATA/Travaux supplémentaires/TabExcel.xlsx")
+
+TableauGithub <- select(TableauDonnees, 1:4)
+kbl(TableauGithub,longtable = TRUE, caption = "Liste Etudiants/Mail/Github",booktabs = T)%>%
+  kable_styling(bootstrap_options = "striped",
+                latex_options = c("repeat_header"),
+                font_size = 8.5,
+                position = "center")%>%
+  row_spec(0, bold = TRUE, font_size = 13)%>%
+  column_spec(1:2, italic = TRUE)%>%
+  column_spec(4, bold = TRUE, color = "blue")
+```
+
+Comme tout vos travaux seront sur vos Github, ceux-ci seront visibles par tous les étudiants et donc l'ensemble de ces travaux auxquels s'ajoutent les fichiers que vous venez de __« Fork-er »__ constitueront la "base de connaissances"  de votre promotion pour ces deux matières.  
+
+__Attention__ : Vos travaux doivent obligatoirement être livrés sous forme de .Rmd (Rmarkdown) et PDF (ou beamer) dans l’ensemble des GitHub des membres des groupes. 
+
+Dans le cadre de votre formation, et en dehors des partiels, vous aurez 3  travaux à rendre.
+
+### a. Un travail supplémentaire :
+
+C'est un travail écrit à rendre sur les GitHub de tous les membres du groupe (si vous êtes en groupe) pour le __16/11/2020__ sur un des sujets qui vous a été fournit par le professeur ou que vous avez choisit parmi la liste des travaux reçue par mail le 19 octobre 2020.
+
+Quelques travaux supplémentaires feront l'objet d'une présentation rapide à la classe le __16/11/2020__ (non notée), afin que chacun puisse les réutiliser en allant les consulter dans le GitHub de ses camarades. Vous devez alors vous tenir prêt à exposer vos travaux livrés sous forme de .Rmd et PDF (ou beamer) aux autres étudiants. Ils devront permettre à chacun de se faire une idée du sujet traité et de faciliter la lecture votre document, puis de vous poser d'éventuelles questions complémentaires.
+
+Ensuite pour le __20/11/2020__, il faudra faire une vidéo sur le travail supplémentaire. L’ensemble des groupes passeront à l’oral cette fois-ci et l’oral sera noté. Il faudra aussi présenter une slide qui va permettre aux étudiants de comprendre les clés de votre travail, les sources et comment est organisé vos dépôts sur GitHub.
+
+Ci-dessous, la liste des travaux supplémentaires par groupe de travail. 
+
+```{r}
+TableauTravauxSupp <- select(TableauDonnees, 1:2, 5, 7)
+TableauTravauxSupp <- arrange(TableauTravauxSupp, Groupe_TS)
+
+kbl(TableauTravauxSupp,longtable = TRUE, caption = "Liste des travaux supplémentaire par groupe",
+    booktabs = T)%>%
+  kable_styling(bootstrap_options = "striped",
+                latex_options = c("repeat_header"),
+                font_size = 8.5,
+                position = "center")%>%
+  row_spec(0, bold = TRUE, font_size = 13)%>%
+  column_spec(1:2, italic = TRUE)
+#spec_color(TableauTravauxSupp, na_color = "red")
+```
+
+### b. Un dossier sur les packages R :
+
+Un travail écrit en groupe est à rendre sur les GitHub de tous les membres du groupe pour au plus tard __mi-décembre__ (nous nous concerterons pour fixer une date exacte avec le professeur). Ce travail portera sur 2 à 3 packages de R (en dehors des packages déjà évoqués qui correspondent aux travaux supplémentaires). 
+
+Attention, il est préférable de ne pas choisir des packages déjà choisis par vos camarades et votre choix doit être soumis avant __16/11/2020__.
+
+```{r}
+TableauTravauxPackage <- select(TableauDonnees, 1:2, 8:9)
+TableauTravauxPackage <- arrange(TableauTravauxPackage, Groupe_Travaux_R)
+
+kbl(TableauTravauxPackage,longtable = TRUE,
+    caption = "Liste des travaux sur les Packages R par groupe",
+    booktabs = T)%>%
+  kable_styling(bootstrap_options = "striped",
+                latex_options = c("repeat_header"),
+                font_size = 8.5,
+                position = "center")%>%
+  row_spec(0, bold = TRUE, font_size = 13)%>%
+  column_spec(1:2, italic = TRUE)
+
+```
+
+### c. Un dossier de mathématiques pour le Big Data :
+
+Ce travail consiste à travailler en groupe sur les aspects mathématiques de 3 articles de recherche que vous choisirez (ce que de nombreux chercheurs nomment des "papiers" de recherche). 
+
+Ici, on ne vous demande pas d'étudier des thèses car elles sont beaucoup plus volumineuses mais bien des __« papier »__ de recherche. (sauf  biensur si une thèse vous semble très intéressante).
+
+
+__Rappel : Seuls les dossiers sont notés, les travaux supplémentaires sont pourtant à effectuer et amélioreront la note des dossiers si ceux-ci ne sont pas bons.__
+
+
+## 4. Les Annexes :
+
+```{r}
+Table1 <- read_excel("C:/Users/antse/Documents/MSc_PSB/Cours/Programmation R et Maths BigDATA/Travaux supplémentaires/Tableau Règles et Commentaires.xlsx")
+
+kbl(Table1,longtable = TRUE,caption="Tableau récapitulatif des actions à réaliser par l'étudiant",
+    booktabs = T)%>%
+  kable_styling(bootstrap_options="striped",
+                font_size = 9,
+                full_width = FALSE)%>%
+  row_spec(0, bold = TRUE, color = "white", background = "black", font_size = 13)
+```
