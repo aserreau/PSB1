@@ -121,3 +121,15 @@ kbl(Table1,longtable = TRUE,caption="Tableau récapitulatif des actions à réal
                 full_width = FALSE)%>%
   row_spec(0, bold = TRUE, color = "white", background = "black", font_size = 13)
 ```
+
+## 5. Sources :
+
+__Comment lire un fichier Excel ?__
+
+https://readxl.tidyverse.org/reference/read_excel.html
+
+__Comment faire un rapport automatisé ?__
+
+http://larmarange.github.io/analyse-R/rmarkdown-les-rapports-automatises.html
+
+
