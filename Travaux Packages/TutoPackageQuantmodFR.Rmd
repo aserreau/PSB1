@@ -1,0 +1,168 @@
+---
+title: "TutoPackageQuantmodFR"
+author: "Aserreau"
+date: "11/12/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Le but de ce tutoriel est de vous initier à l'analyse financière sur le cours des actions. 
+
+Avant de commencer, utilisons le code suivant pour installer et charger quantmod.
+
+```{r}
+#install.packages("quantmod")
+library(quantmod)
+library(xts)
+library(TTR)
+library(knitr)
+```
+
+## Introduction au Package Quantmod
+
+Afin de charger des données, nous allons utiliser la fonction getSymbols. Cette fonction va aller chercher les données d'une ou plusieurs entreprises. Nous allons ici utiliser des données US. Par défaut, le package importe des données boursières US.
+Vous pouvez trouver l'ensemble des Indice de marché (Stock Market Index) sur le lien suivant : <http://dev.eoddata.com/stocklist/NASDAQ/A.htm>
+
+Tout d'abord nous allons charger les données d'une entreprise américaine que vous connaissez tous : APPLE.  Stock Market Index : AAPL
+
+```{r}
+getSymbols("AAPL")  #charge les données de APPLE dans votre environnement
+head(AAPL)  #permet de voir les données
+```
+Si vous souhaitez importer des données d'une certaine période, vous pouvez restreindre l'intervalle de temps en indiquant les dates précises. 
+```{r}
+getSymbols("AAPL",
+           from='2018-01-01', to='2018-12-31')  #défini l'intervalle des dates
+```
+Il est aussi possible d'utiliser la fonction last() de xts où vous pouvez choisir les données qui date de la dernière année. Voyez l'exemple ci-dessous. 
+```{r}
+getSymbols("GOOG")  #charge les données de GOGLE dans votre environnement
+GOOGLE <- last(AAPL,'1 year') #prend les valeurs de la denrière année de GOOGLE
+head(GOOGLE)
+```
+Vous pouvez donc insérer les données financières d'une entreprise pour les dates que vous choisissez dans une variable. 
+
+Il est aussi possible d'importer  plusieurs indices en une seule fois.
+```{r}
+getSymbols(c("AAPL","GOOG"))
+```
+Si vous souhaitez avoir des informations basiques sur le cours des actions, il est possible d'utiliser les fonctions suivantes : Op, Hi, Lo, Cl, Vo et Ad
+
+```{r}
+Open <- Op(AAPL)   #Prix d'ouverture
+High <- Hi(AAPL)    #Plus haut prix
+Low <- Lo(AAPL)  #Plus bas prix
+Close<- Cl(AAPL)   #Prix de fermeture
+Volume <- Vo(AAPL)   #Volume
+AdjClose <- Ad(AAPL) #Fermeture ajustée
+```
+Exemple d'utilisation : 
+Nous allons calculer la somme des volumes par année
+```{r}
+apply.yearly(Vo(AAPL),sum) #yearly -> année, weekly -> semaine, monthly -> mois
+```
+A présent, vous savez charger des données de différentes sources dans votre espace de travail. Passons à la partie cartographie des données.
+
+## Cartographier les données / Mise en forme
+
+Pour affficher par défaut le cours de l'action (ici de APPLE), il faut utiliser la fonction chartSeries.
+```{r}
+chartSeries(AAPL)
+```
+Si vous souhaitez utiliser différents style, il existe lineChart, barChart et candleChart qui vous sont présentés ci-dessous.
+
+De plus, vous pouvez customiser le graphe à l'aide des paramètres suivants :
+- "subset" permet de définir la période à afficher
+- "theme" permet de définir le fond en blanc ou noir par défaut
+
+```{r}
+lineChart(AAPL,
+          subset="2020", #choix de l'année 2020
+          theme="white") #choix du theme en blanc
+```
+```{r}
+barChart(AAPL,
+            subset="2020-11") #choix du mois de novembre 2020
+                              #choix du theme par defaut
+```
+```{r}
+candleChart(AAPL,
+            subset="2020-08::2020-11",  #choix du mois d'aout à novembre 2020
+            theme = "white") #choix du theme en blanc
+```
+
+## Ajout et utilisation des indicateurs
+
+Dans cette partie, nous allons utiliser des fonctions issues du package (TTR) : Technical Trading Rule. Ce package est téléchargé automatiquement lors de téléchargement de Quantmod. 
+
+Afin d'ajouter des indicateurs, il faut spécifier un paramètre dans chartSeries, c'est "TA", c'est un vecteur d'indicateur technique.
+
+```{r}
+chartSeries(AAPL,
+            name = "Evolution du cours d'Apple",  #ajout d'un titre
+            subset="2020-06::2020-11",  #choix du mois de mars à novembre 2020
+            type = "candlesticks",
+            theme = "white",  #choix du theme en blanc
+            TA = c(addRSI(), addBBands()))#Expl : ajout d'indicateurs
+```
+Il y a de nombreux indicateurs techniques que vous pouvez utiliser pour faire des analyses très spécifiques. Voici certains de ces indicateurs, avec des explications. 
+
+__addWPR()__
+Le %R de Larry Williams est un indicateur boursier qui participe à l'analyse technique. Il consiste en l’étude du cours de l'action dans le but d'identifier les tendances et d'anticiper l'évolution des marchés.
+
+__addSAR()__
+Le SAR parabolique est un indicateur technique utilisé pour déterminer l’orientation des prix d’un actif. Cet indicateur permet d'attirer votre attention sur le moment où l’orientation des prix change. 
+Sur un graphique, l’indicateur apparaît comme une série de points placés au-dessus ou en dessous des barres de prix. Un point en dessous du prix est considéré comme un signal haussier. Inversement, un point au-dessus du prix est utilisé pour illustrer que les cours sont en contrôle et que l’élan est susceptible de rester à la baisse. Lorsque les points se retournent, cela indique un potentiel changement dans la direction des prix qui est en cours. Par exemple, si les points sont au-dessus du prix, quand ils retournent en dessous du prix, il pourrait signaler une nouvelle hausse des prix.
+
+__addROC()__
+Le taux de changement (ROC) est la vitesse à laquelle une variable change sur une période de temps spécifique. Graphiquement, le taux de changement est représenté par la pente d’une ligne (en rouge ci-dessous).Le ROC est un concept financier extrêmement important, car il permet aux investisseurs de repérer l’élan de sécurité et d’autres tendances. 
+Par exemple, un titre à forte dynamique, ou qui a un ROC positif, surpasse normalement le marché à court terme. Inversement, un titre qui a un ROC qui tombe en dessous de sa moyenne mobile (moyenne qui s’affranchit des aberrations de cours), ou celui qui a un ROC faible ou négatif est susceptible de baisser en valeur. C'est peut être le moment de vendre dans ce cas...
+
+```{r}
+chartSeries(AAPL,
+            name = "Evolution du cours d'Apple",  
+            subset="2020-06::2020-11",
+            type = "candlesticks",
+            theme = "white",
+            TA = c(addWPR(), addSAR(), addROC()))
+```
+
+__addRSI()__
+Le Relative Strength Index (RSI) est un indicateur très populaire mis au point par Welles Wilder en 1978.
+Il est généralement utilisé pour mesurer la force ou la “pression” des cours.
+Si le RSI est compris entre 0 et 30, il faut acheter et il faut vendre lorsque le RSI est entre 70 et 100.
+
+__addCCI()__
+Le CCI Commodity Chanel Index, est un indicateur mis au point par Donald Lambert durant les années 1980. 
+Le CCI nous montre les situations de surachat (avec un CCI élevé) et celles de surventes (avec un CCI faible) pour une unité de temps.
+L'indicateur CCI est présenté dans un graphe avec une échelle qui est généralement comprise entre -500 et +500 mais d'autres échelles sont possibles. Vous pourrez généralement repérer l'indicateur entre -100 et +100.
+Ce qu'il faut savoir sur le CCI: 
+- + 100, il indique une situation de surachat
+- -100, il indique une situation de survente
+
+```{r}
+chartSeries(AAPL,
+            name = "Evolution du cours d'Apple",  
+            subset="2020-06::2020-11",
+            type = "candlesticks",
+            theme = "white",
+            TA = c(addRSI(), addCCI(), addBBands()))
+```
+
+```{r}
+
+```
+
+```{r}
+```
+
+```{r}
+```
+
+```{r}
+```
+
+
