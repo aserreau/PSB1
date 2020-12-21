@@ -1,0 +1,196 @@
+---
+title: 'Package : dabr'
+author: "Corentin Bretonniere & Antoine Serreau"
+date: "11/11/2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Installation du package "dabr"
+
+Le package "dabr" est utile en Data Management car il sert à gérer des bases de données, bous allons voir commment l'utiliser et quelles sont les fonctions qui le composent. Il est necessaire d'également installer les packages	suivant (à noter qu'il faut mettre "no" si des compilations sont demandées).
+
+```{r cars, echo=FALSE}
+install.packages("dabr", repos = "http://cran.us.r-project.org")
+install.packages("remotes", repos = "http://cran.us.r-project.org")
+install.packages("dplyr", repos = "http://cran.us.r-project.org")
+install.packages("RMariaDB", repos = "http://cran.us.r-project.org")
+library(dabr)
+```
+
+Une fois tout les packages installé et librairies ouverte nous allons devoir quitter R quelques temps !
+
+Il nous faut télécharger mariadb qui est un moteur de base de donnée gratuit, il nous servira par la suite à convertir notre fichier CSV en Data base SQL.
+
+Ceux sous windows il faut télécharger via ce lien :
+
+mariadb-10.5.8-winx64.msi .
+
+Ceux sur mac OS vous devez installer avec cette commande depuis le terminal : 
+
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+Pour macOS comme pour linux, une fois dans votre terminal entrez cette commande : brew install mariadb
+
+puis : mysql.server start
+
+puis : mysql -uroot - p
+
+changez le mot de passe de votre serveur SQL avec la commande : sudo mysqladmin -u root -p password root
+
+et lancer mariadb avec la commande : brew service start mariadb
+
+avec la commande : "mysql" vous verrez que vous êtes bien admin de votre base de donnée
+
+puis entrez la commande : FLUSH PRIVILEGES
+
+Ensuite téléchargez https://sequelpro.com/download
+
+Une fois le téléchargement fait lancez sequelpro, entrez les paramètres de votre serveur mySQL et mettez "localhost" à hôte.
+
+Inserez votre base de donnée et paramétrez vos colonnes comme vous le souhaitez.
+
+
+
+Une fois toutes ces démarches fastidieuses faites, nous pouvons revenir sur R et enfin pouvoir tater le package "dabr".
+Pour savoir quelles fonctions sont incluses dans "dabr" il suffit d'entrer cette commande : 
+```{r, echo=TRUE}
+ls("package:dabr")
+```
+
+
+Dans la présentation du package dabr je vais utiliser une data base téléchargée sur kaggle avec des diverses données en relation avec les 50 musiques les plus écoutées sur Spotify en 2019 (Artiste, Nom de la musique, BPM,...).
+
+## 1/ fonction "dbconnect"
+
+Cette fonction permet de créer la connecter à la database préalablement crée à l'aide de mariadb sur Sequelpro. Dans R note database est appelée avec "conn" : 
+
+```{r, echo=TRUE}
+conn <- RMariaDB::dbConnect(RMariaDB::MariaDB(),
+                            user = "root",
+                            password = 'root',
+                            dbname = 'Top50',
+                            host = "127.0.0.1",
+                            port = 3306)
+```
+
+## 2/ La fonction "is.connected"
+
+Cette fonction sert à vérifier que la table est bien connectée.
+
+```{r, echo=TRUE}
+is.connected.MariaDBConnection <- function(conn, ...) {
+  RMariaDB::dbIsValid(conn)
+}
+
+is.connected.MariaDBConnection(conn)
+```
+
+
+## 3/ fonction "close_conn"
+
+Cette fonction permet, en opposition à dbconnect, de fermer la connection à une data base.
+
+```{r, echo=TRUE}
+close_conn.MariaDBConnection <- function(conn, ...) {
+  RMariaDB::dbDisconnect(conn)
+}
+
+close_conn.MariaDBConnection(conn)
+```
+
+Nous pouvons vérifier que la connexion à la dababase à bien été interrompu :
+```{r, echo=TRUE}
+is.connected.MariaDBConnection(conn)
+```
+
+Nous allons  ré-établir la connexion pour parcourir les autres fonctions que contient le package "dabr".
+```{r, echo=TRUE}
+conn <- RMariaDB::dbConnect(RMariaDB::MariaDB(),
+                            user = "root",
+                            password = 'root',
+                            dbname = 'Top50',
+                            host = "127.0.0.1",
+                            port = 3306)
+
+is.connected.MariaDBConnection(conn)
+```
+
+## 4/ La foncction "list_tables"
+
+Cette fonction sert tout simplement à regarder quelles sont les colonnes de notre database
+
+```{r, echo=TRUE}
+dabr::list_tables(conn)
+```
+
+## 5/ fonction "delete"
+
+Cette fonction sert à supprimer une requete (query).
+
+Le code ci-dessous vas servir à enlever les espaces avant et après les data, s'il y en a.
+
+```{r, echo=TRUE}
+query <- paste(unlist(lapply(c(), trimws)), collapse = " ")
+
+delete.MariaDBConnection <- function(conn, ..., quiet = FALSE) {query}
+
+dabr::delete(conn, query, quiet = FALSE)
+```
+## 6/ fonction "select_all"
+
+Cette commande permet de selection toute la table en question : 
+
+```{r, echo=TRUE}
+dabr::select_all(conn, "top50")
+```
+
+## 7/ fonction "select"
+
+La fonction select permet de selectionner une colonne de la table, la commande pour cela est semblable en certains points à une commande SQL.
+
+```{r, echo=TRUE}
+
+dabr::select(conn, "SELECT BPM FROM top50")
+
+```
+
+
+## 8/ fonction "update"
+
+```{r, echo=TRUE}
+
+update <- function(conn, ...) {
+  UseMethod("update", conn)
+}
+#dabr::update(conn, query, quiet = FALSE)
+```
+
+## 9/ La fonction "get_attr"
+
+Cette fonction permet d'avoir la liste des attributs de la table que l'on utilise.
+
+```{r, echo=TRUE}
+get_attr <- function(conn, ...) {
+  UseMethod("get_attr", conn)
+}
+dabr::get_attr(conn, "top50")
+```
+
+## 10/ La fonction "quote"
+
+Cette fonction permet tout simplement d'ajouter une citation sous forme de string.
+
+```{r, echo=TRUE}
+quote <- function(conn, ...) {
+  UseMethod("quote", conn)
+}
+
+dabr::quote("Cette Database regroupe les 50 musiques les plus écoutées sur spotify en 2019")
+```
+
